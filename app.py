@@ -104,12 +104,18 @@ QUEUE_TPL = """
     margin-bottom: 0.85rem;
   }
 
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid #262d38;
+  }
+  .site-logo img { height: 32px; display: block; }
   nav {
     display: flex;
     gap: 1.75rem;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.15rem;
-    border-bottom: 1px solid #262d38;
     font-size: 14px;
   }
   nav a { color: #8892a0; text-decoration: none; }
@@ -331,10 +337,13 @@ QUEUE_TPL = """
 </head>
 <body>
 
-<nav>
-  <a href="{{ url_for('queue') }}" class="current">Queue</a>
-  <a href="{{ url_for('buyers_page') }}">Buyers</a>
-</nav>
+<div class="site-header">
+  <a class="site-logo" href="{{ url_for('queue') }}"><img src="{{ url_for('static', filename='logo.png') }}" alt="Dogman's Flip Ops" /></a>
+  <nav>
+    <a href="{{ url_for('queue') }}" class="current">Queue</a>
+    <a href="{{ url_for('buyers_page') }}">Buyers</a>
+  </nav>
+</div>
 
 {% with messages = get_flashed_messages() %}
   {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
@@ -453,6 +462,23 @@ LEAD_TPL = """
     font-weight: 500;
     margin-bottom: 0.95rem;
   }
+
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid #262d38;
+  }
+  .site-logo img { height: 32px; display: block; }
+  nav {
+    display: flex;
+    gap: 1.75rem;
+    font-size: 14px;
+  }
+  nav a { color: #8892a0; text-decoration: none; }
+  nav a:hover { color: #c7ccd5; text-decoration: none; }
 
   .back {
     color: #5f6977;
@@ -889,6 +915,14 @@ LEAD_TPL = """
 </head>
 <body>
 
+<div class="site-header">
+  <a class="site-logo" href="{{ url_for('queue') }}"><img src="{{ url_for('static', filename='logo.png') }}" alt="Dogman's Flip Ops" /></a>
+  <nav>
+    <a href="{{ url_for('queue') }}">Queue</a>
+    <a href="{{ url_for('buyers_page') }}">Buyers</a>
+  </nav>
+</div>
+
 <a class="back" href="{{ url_for('queue') }}">← queue</a>
 
 <div class="header">
@@ -1188,12 +1222,18 @@ BUYERS_TPL = """
     margin-bottom: 0.95rem;
   }
 
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid #262d38;
+  }
+  .site-logo img { height: 32px; display: block; }
   nav {
     display: flex;
     gap: 1.75rem;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.15rem;
-    border-bottom: 1px solid #262d38;
     font-size: 14px;
   }
   nav a { color: #8892a0; text-decoration: none; }
@@ -1335,10 +1375,13 @@ BUYERS_TPL = """
 </head>
 <body>
 
-<nav>
-  <a href="{{ url_for('queue') }}">Queue</a>
-  <a href="{{ url_for('buyers_page') }}" class="current">Buyers</a>
-</nav>
+<div class="site-header">
+  <a class="site-logo" href="{{ url_for('queue') }}"><img src="{{ url_for('static', filename='logo.png') }}" alt="Dogman's Flip Ops" /></a>
+  <nav>
+    <a href="{{ url_for('queue') }}">Queue</a>
+    <a href="{{ url_for('buyers_page') }}" class="current">Buyers</a>
+  </nav>
+</div>
 
 {% with messages = get_flashed_messages() %}
   {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
