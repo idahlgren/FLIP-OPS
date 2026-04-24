@@ -112,7 +112,7 @@ QUEUE_TPL = """
     padding-bottom: 1.15rem;
     border-bottom: 1px solid #262d38;
   }
-  .site-logo img { height: 54px; display: block; }
+  .site-logo img { height: 108px; display: block; }
   nav {
     display: flex;
     gap: 1.75rem;
@@ -471,7 +471,7 @@ LEAD_TPL = """
     padding-bottom: 1.15rem;
     border-bottom: 1px solid #262d38;
   }
-  .site-logo img { height: 54px; display: block; }
+  .site-logo img { height: 108px; display: block; }
   nav {
     display: flex;
     gap: 1.75rem;
@@ -1230,7 +1230,7 @@ BUYERS_TPL = """
     padding-bottom: 1.15rem;
     border-bottom: 1px solid #262d38;
   }
-  .site-logo img { height: 54px; display: block; }
+  .site-logo img { height: 108px; display: block; }
   nav {
     display: flex;
     gap: 1.75rem;
