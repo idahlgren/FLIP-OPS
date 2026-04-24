@@ -30,6 +30,8 @@ from templates import compose
 from scoring import score_lead
 from auth import require_auth_globally
 from email_sender import send_email, is_configured as email_configured
+from ai import (score_lead_ai, analyze_lead, suggest_actions,
+                personalize_draft, detect_archetype_ai)
 
 
 # ---------------------------------------------------------------------------
@@ -775,6 +777,106 @@ LEAD_TPL = """
 
   .empty { color: #5f6977; padding: 1rem 0; font-size: 13px; }
 
+  /* AI sections */
+  .ai-badge {
+    display: inline-block;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(77, 163, 255, 0.12);
+    color: #4da3ff;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .ai-panel {
+    border-color: rgba(77, 163, 255, 0.25);
+    background: #1a1f27;
+  }
+  .ai-analysis {
+    font-size: 13px;
+    line-height: 1.65;
+    color: #c7ccd5;
+  }
+  .ai-reasoning {
+    font-size: 12px;
+    color: #8892a0;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #22282f;
+    line-height: 1.55;
+  }
+  .ai-flags {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  .ai-flags span {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(250, 204, 21, 0.1);
+    color: #facc15;
+    border: 1px solid rgba(250, 204, 21, 0.2);
+    margin: 2px 4px 2px 0;
+  }
+  .ai-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid #22282f;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .ai-score-val {
+    font-size: 18px;
+    font-weight: 500;
+    color: #4da3ff;
+    font-variant-numeric: tabular-nums;
+  }
+  .ai-actions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .ai-actions-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #22282f;
+    font-size: 13px;
+    color: #c7ccd5;
+  }
+  .ai-actions-list li:last-child { border-bottom: none; }
+  .ai-actions-list li::before {
+    content: "→";
+    color: #4da3ff;
+    margin-right: 8px;
+    font-weight: 500;
+  }
+  .ai-draft-toggle {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #22282f;
+  }
+  .ai-draft-toggle summary {
+    font-size: 12px;
+    color: #4da3ff;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .ai-draft-preview {
+    margin-top: 10px;
+    padding: 12px;
+    background: #16191f;
+    border: 1px solid #2d3540;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: pre-wrap;
+    color: #c7ccd5;
+    line-height: 1.6;
+  }
+
   @media (max-width: 640px) {
     body { padding: 1.5rem 1rem 3rem; }
     .buyer-row { flex-direction: column; gap: 0.5rem; }
@@ -813,6 +915,23 @@ LEAD_TPL = """
       <div class="weight">{{ (f.weight * 100) | round(0) | int }}%</div>
     </div>
   {% endfor %}
+  {% if ai_score %}
+    <div class="ai-score-row">
+      <div>
+        <span style="color: #8892a0;">AI-adjusted score</span>
+        <span class="ai-badge">Claude</span>
+      </div>
+      <div class="ai-score-val">{{ ai_score.adjusted_total | round(0) | int }}%</div>
+    </div>
+    {% if ai_score.reasoning %}
+      <div class="ai-reasoning">{{ ai_score.reasoning }}</div>
+    {% endif %}
+    {% if ai_score.flags %}
+      <div class="ai-flags">
+        {% for flag in ai_score.flags %}<span>{{ flag }}</span>{% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
 </div>
 
 <div class="panel">
@@ -830,6 +949,23 @@ LEAD_TPL = """
     <tr><td>Source list</td><td>{{ lead.source_list or '—' }}</td></tr>
   </table>
 </div>
+
+{% if ai_analysis or ai_actions %}
+<div class="panel ai-panel">
+  <h2>AI Analysis <span class="ai-badge">Claude</span></h2>
+  {% if ai_analysis %}
+    <div class="ai-analysis">{{ ai_analysis }}</div>
+  {% endif %}
+  {% if ai_actions %}
+    <h2 style="margin-top: 1.25rem;">Next actions</h2>
+    <ul class="ai-actions-list">
+      {% for action in ai_actions %}
+        <li>{{ action }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endif %}
 
 <div class="panel">
   <h2>Top buyer matches</h2>
@@ -896,6 +1032,18 @@ LEAD_TPL = """
         {% endif %}
         <button class="primary" type="submit">Log outbound</button>
       </div>
+      {% if ai_draft %}
+        <div class="ai-draft-toggle">
+          <details>
+            <summary>View AI-personalized version <span class="ai-badge">Claude</span></summary>
+            {% if ai_draft.subject %}
+              <div style="font-size: 12px; color: #8892a0; margin-top: 10px;">Subject: <b style="color: #e8eaed;">{{ ai_draft.subject }}</b></div>
+            {% endif %}
+            <div class="ai-draft-preview">{{ ai_draft.body }}</div>
+            <div style="font-size: 11px; color: #5f6977; margin-top: 6px;">Copy into the editor above to use this version.</div>
+          </details>
+        </div>
+      {% endif %}
     </form>
   {% endif %}
 </div>
@@ -939,11 +1087,19 @@ def lead_detail(lead_id):
         business_name=BUSINESS_NAME, business_address=BUSINESS_ADDRESS,
     )
 
+    # AI features
+    ai_score = score_lead_ai(lead, s, matching_buyers=n_buyers)
+    ai_analysis = analyze_lead(lead, messages, buyer_matches=n_buyers)
+    ai_actions = suggest_actions(lead, messages)
+    ai_draft = personalize_draft(lead, draft["body"], draft.get("subject"))
+
     return render_template_string(
         LEAD_TPL, lead=lead, factors=s["factors"], buyer_matches=matches,
         messages=messages, draft=draft,
         stages=db_module.LEAD_STAGES,
         email_available=email_configured(),
+        ai_score=ai_score, ai_analysis=ai_analysis,
+        ai_actions=ai_actions, ai_draft=ai_draft,
     )
 
 
