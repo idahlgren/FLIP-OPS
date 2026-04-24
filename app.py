@@ -1469,7 +1469,8 @@ def import_csv():
         buyers = db_module.list_buyers(conn, zip_code=lead_dict.get("zip_code"))
         return count_matches(lead_dict, buyers)
 
-    result = import_file(conn, tmp.name, score_threshold=70.0,
+    # Temporarily 45 during initial testing — raise to 70 after enrichment screen is built
+    result = import_file(conn, tmp.name, score_threshold=45.0,
                          matching_buyers_fn=enrich)
     os.unlink(tmp.name)
     flash(f"imported {result.imported}, rejected {result.rejected} of {result.total}")

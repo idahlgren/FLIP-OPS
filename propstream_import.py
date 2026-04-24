@@ -82,6 +82,21 @@ FIELD_MAP = {
     "Email 1":                   "_email1",
 
     "List Name":                 "source_list",
+
+    # PropStream v2 export format
+    "Address":                              "prop_address_line",
+    "City":                                 "prop_city",
+    "State":                                "prop_state",
+    "Zip":                                  "zip_code",
+    "Est. Value":                           "estimated_arv",
+    "Est. Remaining balance of Open Loans": "mortgage_balance",
+    "Building Sqft":                        "square_feet",
+    "Total Bathrooms":                      "bathrooms",
+    "Effective Year Built":                 "year_built",
+    "Foreclosure Factor":                   "_foreclosure_factor",
+    "Owner Occupied":                       "_owner_occupied",
+    "Do Not Mail":                          "_do_not_mail",
+    "Lien Amount":                          "_lien_amount",
 }
 
 TRUE_VALS = {"yes", "y", "true", "1", "x", "t"}
