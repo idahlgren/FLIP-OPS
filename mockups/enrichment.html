@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enrich — Wholesale tool</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #c7ccd5;
+    background: #16191f;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.25rem 1.5rem 4rem;
+    letter-spacing: -0.003em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: #4da3ff; text-decoration: none; }
+  a:hover { color: #66b0ff; text-decoration: underline; }
+
+  h1, h2, h3 { font-weight: 500; margin: 0; color: #e8eaed; }
+  h1 { font-size: 22px; letter-spacing: -0.015em; }
+  h2 {
+    font-size: 11px;
+    color: #8892a0;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+    margin-bottom: 0.95rem;
+  }
+
+  nav {
+    display: flex;
+    gap: 1.75rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid #262d38;
+    font-size: 14px;
+  }
+  nav a { color: #8892a0; }
+  nav a:hover { color: #c7ccd5; text-decoration: none; }
+  nav a.current { color: #e8eaed; font-weight: 500; }
+
+  .progress-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.6rem;
+    font-size: 13px;
+    color: #8892a0;
+  }
+  .progress-bar b { color: #e8eaed; font-weight: 500; }
+  .progress-track {
+    width: 100%;
+    height: 3px;
+    background: #262d38;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .progress-fill {
+    width: 40%;
+    height: 100%;
+    background: #4da3ff;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header-meta {
+    color: #8892a0;
+    font-size: 13px;
+    margin-top: 7px;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .header-meta .dot { color: #404855; }
+  .score-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-pill.b {
+    background: rgba(163, 230, 53, 0.1);
+    color: #a3e635;
+    border: 1px solid rgba(163, 230, 53, 0.2);
+  }
+
+  .panel {
+    border: 1px solid #262d38;
+    border-radius: 8px;
+    padding: 1.35rem 1.5rem;
+    margin-bottom: 1.25rem;
+    background: #1a1f27;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  table.kv { width: 100%; font-size: 13px; }
+  table.kv td { padding: 5px 0; vertical-align: top; }
+  table.kv td:first-child {
+    color: #8892a0;
+    width: 140px;
+    padding-right: 1rem;
+  }
+  table.kv td:last-child { color: #c7ccd5; }
+
+  .free-clear {
+    display: inline-block;
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  /* Radio groups */
+  .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .radio-group input[type=radio] { display: none; }
+  .radio-group label {
+    display: inline-block;
+    padding: 9px 14px;
+    border: 1px solid #2d3540;
+    background: #16191f;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #c7ccd5;
+    margin: 0;
+    transition: all 0.15s;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .radio-group label:hover {
+    background: #1e242d;
+    border-color: #3a4252;
+  }
+  .radio-group input[type=radio]:checked + label {
+    background: rgba(77, 163, 255, 0.1);
+    border-color: #4da3ff;
+    color: #4da3ff;
+    font-weight: 500;
+  }
+  .radio-group .hint {
+    display: block;
+    font-size: 11px;
+    color: #5f6977;
+    margin-top: 3px;
+    font-weight: 400;
+  }
+  .radio-group input[type=radio]:checked + label .hint {
+    color: rgba(77, 163, 255, 0.6);
+  }
+
+  .field-label {
+    font-size: 11px;
+    color: #8892a0;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 11px 0;
+    font-size: 13px;
+  }
+  .checkbox-row input[type=checkbox] {
+    margin-top: 3px;
+    accent-color: #4da3ff;
+    width: 14px;
+    height: 14px;
+  }
+  .checkbox-row .label-text {
+    color: #e8eaed;
+    cursor: pointer;
+    display: block;
+  }
+  .checkbox-row .label-hint {
+    font-size: 11px;
+    color: #5f6977;
+    margin-top: 3px;
+  }
+
+  input[type=text], input[type=number], textarea, select {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 11px;
+    border: 1px solid #2d3540;
+    background: #16191f;
+    color: #e8eaed;
+    border-radius: 6px;
+    width: 100%;
+    line-height: 1.4;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #4da3ff;
+    box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.1);
+  }
+  textarea { min-height: 80px; font-size: 13px; }
+  input::placeholder { color: #5f6977; }
+
+  /* Score preview */
+  .score-preview {
+    background: rgba(77, 163, 255, 0.06);
+    border: 1px solid rgba(77, 163, 255, 0.15);
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    font-size: 13px;
+  }
+  .score-delta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .delta-arrow { color: #4da3ff; margin: 0 1em; font-size: 18px; }
+  .score-delta b { font-size: 20px; font-weight: 500; }
+  .score-delta b.old { color: #a3e635; }
+  .score-delta b.new { color: #4ade80; }
+  .score-delta .label {
+    color: #8892a0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .preview-reason {
+    font-size: 13px;
+    color: #8892a0;
+    line-height: 1.6;
+  }
+  .preview-reason b { color: #e8eaed; font-weight: 500; }
+
+  /* Action bar */
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #262d38;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .action-bar .left {
+    color: #8892a0;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid #3a4252;
+    background: #262d38;
+    color: #e8eaed;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: all 0.15s;
+  }
+  button:hover { background: #2d3540; border-color: #404855; }
+  button.primary {
+    background: #4da3ff;
+    border-color: #4da3ff;
+    color: #0a0d12;
+    font-weight: 500;
+  }
+  button.primary:hover { background: #66b0ff; border-color: #66b0ff; }
+  button.secondary {
+    background: #1e242d;
+    color: #8892a0;
+  }
+  button.danger {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+    background: rgba(248, 113, 113, 0.05);
+  }
+  button.danger:hover {
+    background: rgba(248, 113, 113, 0.1);
+    border-color: rgba(248, 113, 113, 0.5);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#">Queue</a>
+  <a href="#">Buyers</a>
+  <a href="#" class="current">Enrich</a>
+</nav>
+
+<div class="progress-bar">
+  <div>Reviewing <b>2 of 5</b> new leads</div>
+  <div>goal: &lt; 2 min per lead</div>
+</div>
+<div class="progress-track"><div class="progress-fill"></div></div>
+
+<div class="header">
+  <h1>4021 Barron Ave, Memphis, TN 38109</h1>
+  <div class="header-meta">
+    Robert Hayes
+    <span class="dot">·</span>
+    Current score <span class="score-pill b">77%</span>
+    <span class="dot">·</span>
+    pre-foreclosure
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <h2>Quick context</h2>
+    <table class="kv">
+      <tr><td>ARV</td><td>$92,000</td></tr>
+      <tr><td>Mortgage</td><td>$28,500</td></tr>
+      <tr><td>Beds / baths</td><td>3 / 1</td></tr>
+      <tr><td>Sqft / year</td><td>1,105 / 1958</td></tr>
+      <tr><td>Years owned</td><td>22</td></tr>
+      <tr><td>Street view</td><td><a href="#" target="_blank">open Google Maps ↗</a></td></tr>
+      <tr><td>Propstream</td><td><a href="#" target="_blank">open parcel ↗</a></td></tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Score preview</h2>
+    <div class="score-preview">
+      <div class="score-delta">
+        <div>
+          <div class="label">Before</div>
+          <b class="old">77%</b>
+        </div>
+        <div class="delta-arrow">→</div>
+        <div style="text-align: right;">
+          <div class="label">After</div>
+          <b class="new">89%</b>
+        </div>
+      </div>
+    </div>
+    <div class="preview-reason">
+      Boost comes from: repair tier confirmed (<b>light</b>) and condition marked <b>livable</b>.
+      Buyer match count increased from 1 to 3.
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Repair tier</h2>
+  <div class="field-label">How much work does this need?</div>
+  <div class="radio-group">
+    <input type="radio" name="repair" id="r1" />
+    <label for="r1">Cosmetic<span class="hint">&lt; 10% ARV · paint, floors</span></label>
+    <input type="radio" name="repair" id="r2" checked />
+    <label for="r2">Light<span class="hint">10–20% ARV · kitchen or bath</span></label>
+    <input type="radio" name="repair" id="r3" />
+    <label for="r3">Medium<span class="hint">20–30% ARV · systems</span></label>
+    <input type="radio" name="repair" id="r4" />
+    <label for="r4">Heavy<span class="hint">30%+ ARV · gut job</span></label>
+    <input type="radio" name="repair" id="r5" />
+    <label for="r5">Unknown<span class="hint">can't tell yet</span></label>
+  </div>
+
+  <div class="field-label" style="margin-top: 1.25rem;">Condition</div>
+  <div class="radio-group">
+    <input type="radio" name="condition" id="c1" />
+    <label for="c1">Move-in ready</label>
+    <input type="radio" name="condition" id="c2" checked />
+    <label for="c2">Livable, needs work</label>
+    <input type="radio" name="condition" id="c3" />
+    <label for="c3">Distressed / vacant</label>
+    <input type="radio" name="condition" id="c4" />
+    <label for="c4">Gut condition</label>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Signals to confirm</h2>
+  <div class="checkbox-row">
+    <input type="checkbox" id="sig1" checked />
+    <div>
+      <label for="sig1" class="label-text">Pre-foreclosure confirmed (PropStream flag)</label>
+      <div class="label-hint">County records or NOD filing matches</div>
+    </div>
+  </div>
+  <div class="checkbox-row">
+    <input type="checkbox" id="sig2" />
+    <div>
+      <label for="sig2" class="label-text">Vacant (drove by or utility check)</label>
+      <div class="label-hint">Boost motivation score by ~25 pts</div>
+    </div>
+  </div>
+  <div class="checkbox-row">
+    <input type="checkbox" id="sig3" />
+    <div>
+      <label for="sig3" class="label-text">Absentee owner (mailing address differs)</label>
+      <div class="label-hint">Already captured: same-city address</div>
+    </div>
+  </div>
+  <div class="checkbox-row">
+    <input type="checkbox" id="sig4" />
+    <div>
+      <label for="sig4" class="label-text">Code violations on file</label>
+      <div class="label-hint">Check Memphis 311 portal</div>
+    </div>
+  </div>
+  <div class="checkbox-row">
+    <input type="checkbox" id="sig5" />
+    <div>
+      <label for="sig5" class="label-text">Tax delinquent (years behind?)</label>
+      <div class="label-hint">Shelby County Trustee site</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Seller asking price (if known)</h2>
+  <div style="display: flex; gap: 12px; align-items: center;">
+    <span style="color: #8892a0;">$</span>
+    <input type="number" placeholder="e.g. 55000" style="max-width: 200px;" />
+    <span style="font-size: 12px; color: #5f6977;">optional — only if they've said a number</span>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Notes</h2>
+  <textarea placeholder="Anything the scoring doesn't capture — neighbor tip, family drama, specific contact pattern..."></textarea>
+</div>
+
+<div class="action-bar">
+  <div class="left">2 of 5 · est. 6 min remaining</div>
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <button class="danger" type="button">Skip this lead</button>
+    <button class="secondary" type="button">Save &amp; next</button>
+    <button class="primary" type="submit">Save &amp; work now →</button>
+  </div>
+</div>
+
+</body>
+</html>

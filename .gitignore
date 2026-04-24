@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+*.db
+*.db-journal
+.env
+.DS_Store
+*.zip
+/queue.html
+/lead_detail.html
+/buyers.html
+/enrichment.html

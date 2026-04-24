@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Queue — Wholesale tool</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #c7ccd5;
+    background: #16191f;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.25rem 1.5rem 4rem;
+    letter-spacing: -0.003em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: #4da3ff; text-decoration: none; }
+  a:hover { color: #66b0ff; text-decoration: underline; }
+
+  h1, h2, h3 { font-weight: 500; margin: 0; color: #e8eaed; }
+  h1 { font-size: 24px; letter-spacing: -0.015em; }
+  h2 {
+    font-size: 11px;
+    color: #8892a0;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+    margin-bottom: 0.85rem;
+  }
+
+  nav {
+    display: flex;
+    gap: 1.75rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid #262d38;
+    font-size: 14px;
+  }
+  nav a { color: #8892a0; text-decoration: none; }
+  nav a:hover { color: #c7ccd5; text-decoration: none; }
+  nav a.current { color: #e8eaed; font-weight: 500; }
+  nav a.badge::after {
+    content: attr(data-count);
+    margin-left: 6px;
+    font-size: 10px;
+    background: rgba(77, 163, 255, 0.15);
+    color: #4da3ff;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1.75rem;
+  }
+  .header-row .meta {
+    font-size: 13px;
+    color: #5f6977;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .summary {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .summary .card {
+    padding: 0.85rem 1.1rem;
+    background: #1e242d;
+    border: 1px solid #262d38;
+    border-radius: 8px;
+    flex: 1 1 115px;
+    min-width: 115px;
+  }
+  .summary .label {
+    font-size: 10px;
+    color: #8892a0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .summary .val {
+    font-size: 24px;
+    font-weight: 500;
+    margin-top: 4px;
+    color: #e8eaed;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .table-wrap {
+    border: 1px solid #262d38;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1a1f27;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8892a0;
+    padding: 0.75rem 1rem;
+    background: #1e242d;
+    border-bottom: 1px solid #262d38;
+  }
+  tbody td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid #22282f;
+    font-size: 14px;
+    vertical-align: baseline;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #20262f; }
+
+  .score {
+    display: inline-block;
+    min-width: 38px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    text-align: center;
+  }
+  .score.a {
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+  }
+  .score.b {
+    background: rgba(163, 230, 53, 0.1);
+    color: #a3e635;
+    border: 1px solid rgba(163, 230, 53, 0.18);
+  }
+  .score.c {
+    background: rgba(250, 204, 21, 0.1);
+    color: #facc15;
+    border: 1px solid rgba(250, 204, 21, 0.2);
+  }
+  .score.d {
+    background: rgba(251, 146, 60, 0.1);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.2);
+  }
+
+  .property-link { color: #c7ccd5; font-weight: 400; }
+  .property-link:hover { color: #e8eaed; text-decoration: none; }
+  .owner { color: #8892a0; font-size: 13px; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(140, 146, 160, 0.12);
+    color: #8892a0;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .pill.new {
+    background: rgba(77, 163, 255, 0.12);
+    color: #4da3ff;
+  }
+  .pill.contacted {
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+  }
+  .pill.attempted {
+    background: rgba(250, 204, 21, 0.12);
+    color: #facc15;
+  }
+
+  .archetype {
+    font-size: 12px;
+    color: #8892a0;
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+  }
+
+  .section-divider {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #262d38;
+  }
+
+  form.import-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 1.5rem;
+    background: #1e242d;
+    border: 1px solid #262d38;
+    border-radius: 8px;
+  }
+
+  input[type=file] {
+    font-size: 13px;
+    color: #c7ccd5;
+  }
+  input[type=file]::-webkit-file-upload-button {
+    background: #262d38;
+    color: #e8eaed;
+    border: 1px solid #3a4252;
+    border-radius: 5px;
+    padding: 6px 12px;
+    margin-right: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  input[type=file]::-webkit-file-upload-button:hover {
+    background: #2d3540;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 0.55rem 1rem;
+    border: 1px solid #3a4252;
+    background: #262d38;
+    color: #e8eaed;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: background 0.15s;
+  }
+  button:hover { background: #2d3540; }
+  button.primary {
+    background: #4da3ff;
+    border-color: #4da3ff;
+    color: #0a0d12;
+    font-weight: 500;
+  }
+  button.primary:hover { background: #66b0ff; border-color: #66b0ff; }
+
+  .hint { font-size: 12px; color: #5f6977; }
+
+  .flash {
+    background: rgba(77, 163, 255, 0.08);
+    border: 1px solid rgba(77, 163, 255, 0.2);
+    color: #c7ccd5;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.25rem;
+    font-size: 13px;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 1.5rem 1rem 3rem; }
+    .summary .card { flex-basis: calc(50% - 0.3rem); }
+    thead { display: none; }
+    tbody tr { display: block; padding: 0.9rem 1rem; border-bottom: 1px solid #22282f; }
+    tbody td { display: inline-block; border: none; padding: 2px 8px 2px 0; }
+    tbody td:first-child { display: block; margin-bottom: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="current">Queue</a>
+  <a href="#">Buyers</a>
+  <a href="#" class="badge" data-count="3">Enrich</a>
+</nav>
+
+<div class="header-row">
+  <h1>Queue</h1>
+  <div class="meta">6 active · 42 archived</div>
+</div>
+
+<div class="summary">
+  <div class="card"><div class="label">New</div><div class="val">3</div></div>
+  <div class="card"><div class="label">Attempted</div><div class="val">1</div></div>
+  <div class="card"><div class="label">Contacted</div><div class="val">2</div></div>
+  <div class="card"><div class="label">Offer out</div><div class="val">0</div></div>
+  <div class="card"><div class="label">Under contract</div><div class="val">0</div></div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 70px;">Score</th>
+        <th>Property</th>
+        <th style="width: 180px;">Owner</th>
+        <th style="width: 110px;">Stage</th>
+        <th style="width: 130px;">Archetype</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="score a">95</span></td>
+        <td><a class="property-link" href="#">1234 Elm St, Memphis, TN 38127</a></td>
+        <td class="owner">Jane Doe</td>
+        <td><span class="pill new">new</span></td>
+        <td class="archetype">probate</td>
+      </tr>
+      <tr>
+        <td><span class="score a">87</span></td>
+        <td><a class="property-link" href="#">3144 Brookmeade, Memphis, TN 38128</a></td>
+        <td class="owner">James &amp; Linda Park</td>
+        <td><span class="pill contacted">contacted</span></td>
+        <td class="archetype">general</td>
+      </tr>
+      <tr>
+        <td><span class="score b">82</span></td>
+        <td><a class="property-link" href="#">4021 Barron Ave, Memphis, TN 38109</a></td>
+        <td class="owner">Robert Hayes</td>
+        <td><span class="pill new">new</span></td>
+        <td class="archetype">pre_foreclosure</td>
+      </tr>
+      <tr>
+        <td><span class="score b">77</span></td>
+        <td><a class="property-link" href="#">8812 Raleigh Lagrange, Memphis, TN 38128</a></td>
+        <td class="owner">Maria Johnson</td>
+        <td><span class="pill contacted">contacted</span></td>
+        <td class="archetype">tax_delinquent</td>
+      </tr>
+      <tr>
+        <td><span class="score c">72</span></td>
+        <td><a class="property-link" href="#">552 Looney Ave, Memphis, TN 38107</a></td>
+        <td class="owner">Daniel Pierce</td>
+        <td><span class="pill attempted">attempted</span></td>
+        <td class="archetype">general</td>
+      </tr>
+      <tr>
+        <td><span class="score c">70</span></td>
+        <td><a class="property-link" href="#">1907 Douglass Ave, Memphis, TN 38107</a></td>
+        <td class="owner">Marcus Tate</td>
+        <td><span class="pill new">new</span></td>
+        <td class="archetype">vacant_distressed</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section-divider">
+  <h2>Import PropStream CSV</h2>
+  <form class="import-form">
+    <input type="file" accept=".csv" />
+    <button class="primary" type="submit">Import</button>
+    <span class="hint">Leads below 70% are auto-rejected. Buyer matches enrich the score on import.</span>
+  </form>
+</div>
+
+</body>
+</html>

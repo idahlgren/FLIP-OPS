@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1234 Elm St — Wholesale tool</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #c7ccd5;
+    background: #16191f;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.25rem 1.5rem 4rem;
+    letter-spacing: -0.003em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: #4da3ff; text-decoration: none; }
+  a:hover { color: #66b0ff; text-decoration: underline; }
+
+  h1, h2, h3 { font-weight: 500; margin: 0; color: #e8eaed; }
+  h1 { font-size: 22px; letter-spacing: -0.015em; }
+  h2 {
+    font-size: 11px;
+    color: #8892a0;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+    margin-bottom: 0.95rem;
+  }
+
+  .back {
+    color: #5f6977;
+    font-size: 13px;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+  }
+  .back:hover { color: #c7ccd5; text-decoration: none; }
+
+  .header { margin-bottom: 1.5rem; }
+  .header-meta {
+    color: #8892a0;
+    font-size: 13px;
+    margin-top: 7px;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .header-meta .dot { color: #404855; }
+
+  .score-header {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-header.a {
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+  }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(140, 146, 160, 0.12);
+    color: #8892a0;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .pill.new { background: rgba(77, 163, 255, 0.12); color: #4da3ff; }
+  .pill.contacted { background: rgba(74, 222, 128, 0.12); color: #4ade80; }
+
+  .opted-out {
+    color: #f87171;
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .panel {
+    border: 1px solid #262d38;
+    border-radius: 8px;
+    padding: 1.35rem 1.5rem;
+    margin-bottom: 1.25rem;
+    background: #1a1f27;
+  }
+
+  /* Score factors */
+  .factor {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    margin: 11px 0;
+  }
+  .factor .name {
+    width: 110px;
+    color: #8892a0;
+  }
+  .factor .bar {
+    flex: 1;
+    height: 6px;
+    background: #262d38;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0 14px;
+  }
+  .factor .fill {
+    height: 100%;
+    background: #4ade80;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+  .factor .pct {
+    width: 42px;
+    text-align: right;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: #e8eaed;
+  }
+  .factor .weight {
+    width: 52px;
+    text-align: right;
+    color: #5f6977;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .action-line {
+    margin-top: 1.25rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid #22282f;
+    font-size: 13px;
+    color: #8892a0;
+  }
+  .action-line b {
+    color: #4ade80;
+    font-weight: 500;
+  }
+
+  /* Details KV table */
+  table.kv { width: 100%; font-size: 13px; }
+  table.kv td {
+    padding: 5px 0;
+    vertical-align: top;
+  }
+  table.kv td:first-child {
+    color: #8892a0;
+    width: 150px;
+    padding-right: 1rem;
+  }
+  table.kv td:last-child { color: #c7ccd5; }
+  .free-clear {
+    display: inline-block;
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  /* Buyer matches */
+  .buyer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #22282f;
+    font-size: 13px;
+    gap: 1rem;
+  }
+  .buyer-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .buyer-row b { color: #e8eaed; font-weight: 500; }
+  .buyer-row .meta-row {
+    font-size: 11px;
+    color: #5f6977;
+    margin-top: 3px;
+  }
+  .buyer-row .stats {
+    color: #8892a0;
+    font-size: 12px;
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .rank {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: #4da3ff;
+  }
+
+  /* Conversation */
+  .msg {
+    padding: 11px 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-size: 13px;
+    line-height: 1.55;
+    border: 1px solid #262d38;
+  }
+  .msg.outbound { background: #1e242d; }
+  .msg.inbound {
+    background: #1a2330;
+    border-color: rgba(77, 163, 255, 0.2);
+    margin-left: 2rem;
+  }
+  .msg .meta-row {
+    font-size: 11px;
+    color: #5f6977;
+    margin-bottom: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .msg .subject {
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #e8eaed;
+  }
+  .msg .body {
+    white-space: pre-wrap;
+    color: #c7ccd5;
+  }
+
+  /* Compose */
+  label {
+    font-size: 11px;
+    color: #8892a0;
+    display: block;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+  input[type=text], input[type=number], select, textarea {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 11px;
+    border: 1px solid #2d3540;
+    background: #16191f;
+    color: #e8eaed;
+    border-radius: 6px;
+    width: 100%;
+    line-height: 1.4;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #4da3ff;
+    box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.1);
+  }
+  textarea {
+    min-height: 180px;
+    font-size: 13px;
+    line-height: 1.65;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  }
+
+  .template-note {
+    font-size: 12px;
+    color: #8892a0;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: rgba(77, 163, 255, 0.06);
+    border: 1px solid rgba(77, 163, 255, 0.15);
+    border-radius: 6px;
+  }
+  .template-note b { color: #e8eaed; font-weight: 500; }
+
+  .form-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .form-actions select { width: auto; }
+  .form-actions .send-check {
+    font-size: 13px;
+    color: #c7ccd5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    margin: 0;
+  }
+  .form-actions input[type=checkbox] {
+    accent-color: #4da3ff;
+    width: 14px;
+    height: 14px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid #3a4252;
+    background: #262d38;
+    color: #e8eaed;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: all 0.15s;
+  }
+  button:hover { background: #2d3540; border-color: #404855; }
+  button.primary {
+    background: #4da3ff;
+    border-color: #4da3ff;
+    color: #0a0d12;
+    font-weight: 500;
+  }
+  button.primary:hover {
+    background: #66b0ff;
+    border-color: #66b0ff;
+  }
+
+  .warn-banner {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    color: #f87171;
+    padding: 0.7rem 0.95rem;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  .stage-form { display: flex; gap: 10px; align-items: center; }
+  .stage-form select { width: 220px; }
+
+  .empty { color: #5f6977; padding: 1rem 0; font-size: 13px; }
+
+  @media (max-width: 640px) {
+    body { padding: 1.5rem 1rem 3rem; }
+    .buyer-row { flex-direction: column; gap: 0.5rem; }
+    .buyer-row .stats { text-align: left; }
+    table.kv td:first-child { width: 120px; }
+    .msg.inbound { margin-left: 0; }
+    .factor .weight { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back" href="#">← queue</a>
+
+<div class="header">
+  <h1>1234 Elm St, Memphis, TN 38127</h1>
+  <div class="header-meta">
+    Score <span class="score-header a">95%</span>
+    <span class="dot">·</span> probate
+    <span class="dot">·</span> stage <span class="pill">new</span>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Score breakdown</h2>
+  <div class="factor">
+    <div class="name">motivation</div>
+    <div class="bar"><div class="fill" style="width: 100%;"></div></div>
+    <div class="pct">100</div>
+    <div class="weight">30%</div>
+  </div>
+  <div class="factor">
+    <div class="name">economics</div>
+    <div class="bar"><div class="fill" style="width: 91%;"></div></div>
+    <div class="pct">91</div>
+    <div class="weight">50%</div>
+  </div>
+  <div class="factor">
+    <div class="name">workability</div>
+    <div class="bar"><div class="fill" style="width: 100%;"></div></div>
+    <div class="pct">100</div>
+    <div class="weight">20%</div>
+  </div>
+  <div class="action-line">
+    <b>Work immediately — top of the queue.</b>
+    MAO ~$76k · ARV $135k · repairs ~$27k est · seller ask $55k
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Details</h2>
+  <table class="kv">
+    <tr><td>Owner</td><td>Jane Doe</td></tr>
+    <tr><td>Phone</td><td>(901) 555-1234</td></tr>
+    <tr><td>Email</td><td>jane@email.com</td></tr>
+    <tr><td>Mailing</td><td>5678 Oak Rd, Atlanta, GA 30301</td></tr>
+    <tr><td>ARV / repair</td><td>$135,000 / $27,000</td></tr>
+    <tr><td>Mortgage</td><td>$0 <span class="free-clear">free &amp; clear</span></td></tr>
+    <tr><td>Beds / baths</td><td>3 / 1.5</td></tr>
+    <tr><td>Sqft / year</td><td>1,240 / 1962</td></tr>
+    <tr><td>Years owned</td><td>27</td></tr>
+    <tr><td>Source list</td><td>38127 probate + absentee</td></tr>
+  </table>
+</div>
+
+<div class="panel">
+  <h2>Top buyer matches</h2>
+  <div class="buyer-row">
+    <div>
+      <b>Mid-South Rental Fund LLC</b> — rank <span class="rank">74</span>
+      <div class="meta-row">light rehab · ARV in sweet spot</div>
+    </div>
+    <div class="stats">2 closed · avg 72% of ARV</div>
+  </div>
+  <div class="buyer-row">
+    <div>
+      <b>Robert Khan Holdings</b> — rank <span class="rank">58</span>
+      <div class="meta-row">no track record</div>
+    </div>
+    <div class="stats">0 closed</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Conversation</h2>
+  <div class="msg outbound">
+    <div class="meta-row">2026-04-23 14:22 · → email · probate_email_v1</div>
+    <div class="subject">Re: the house on Elm St</div>
+    <div class="body">Hi Jane,
+
+I saw the property at 1234 Elm St has been in the family for a while, and it looks like it's now on your plate to figure out.
+
+I'm a local buyer in Memphis and I buy houses like this as-is — no repairs, no showings, no agent fees. Would you be open to a short call Thursday or Friday?
+
+— Alex Chen</div>
+  </div>
+  <div class="msg inbound">
+    <div class="meta-row">2026-04-23 19:04 · ← email</div>
+    <div class="body">Maybe. What are you thinking price-wise?</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Compose outreach</h2>
+  <div class="template-note">
+    Template: <b>probate_email_v1</b> · subject: <b>Re: the house on Elm St</b>
+  </div>
+  <label>Subject</label>
+  <input type="text" value="Re: the house on Elm St" style="margin-bottom: 10px;" />
+  <label>Body</label>
+  <textarea>Hi Jane,
+
+Thanks for writing back. I don't want to throw a number out before I've had a chance to look at comps for the block and get a sense of condition.
+
+Can I swing by the house briefly on Saturday morning, or if there are tenants, chat with them by phone? I'll have a solid number for you by Sunday evening.
+
+— Alex
+(901) 555-0199</textarea>
+  <div class="form-actions">
+    <select>
+      <option selected>Email</option>
+      <option>Mail (mark as sent)</option>
+      <option>Call (log as contact)</option>
+    </select>
+    <label class="send-check"><input type="checkbox" checked /> Send email now</label>
+    <button class="primary" type="submit">Log outbound</button>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Advance stage</h2>
+  <form class="stage-form">
+    <select>
+      <option>new</option>
+      <option>attempted</option>
+      <option selected>contacted</option>
+      <option>conversation</option>
+      <option>offer_out</option>
+      <option>under_contract</option>
+      <option>assigned</option>
+      <option>dead</option>
+    </select>
+    <button type="submit">Update</button>
+  </form>
+</div>
+
+</body>
+</html>
